@@ -65,32 +65,6 @@ const DraggableGrid = () => {
     }
   };
 
-  // const handleResize = (_, itemId, direction) => {
-  //   setItems((prevItems) =>
-  //     prevItems.map((item) => {
-  //       if (item.id === itemId) {
-  //         const width = direction === "right" ? item.width + 1 : item.width;
-  //         const height = direction === "bottom" ? item.height + 1 : item.height;
-
-  //         // TODO: Constrain the position based on dimensions
-  //         // const { constrainedRow, constrainedCol } = constrainPosition(
-  //         //   item.row,
-  //         //   item.col,
-  //         //   width,
-  //         //   height
-  //         // );
-
-  //         return {
-  //           ...item,
-  //           width,
-  //           height,
-  //         };
-  //       }
-  //       return item;
-  //     })
-  //   );
-  // };
-
   const handleDragOver = (e) => {
     e.preventDefault();
   };
@@ -122,14 +96,6 @@ const DraggableGrid = () => {
             <span>{item.id}</span>
             {item.isLocked && <span> LOCKED !!</span>}
           </p>
-          {/* <div
-            className="resize-handle right"
-            onMouseDown={(e) => handleResize(e, item.id, "right")}
-          ></div>
-          <div
-            className="resize-handle bottom"
-            onMouseDown={(e) => handleResize(e, item.id, "bottom")}
-          ></div> */}
         </div>
       ))}
     </div>

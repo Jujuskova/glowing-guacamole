@@ -1,21 +1,21 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Rnd } from "react-rnd";
 import "./App.css";
 
 const CONFIG_GRID = {
   COLUMNS: 10,
-  ROWS: 15,
-  CELL_SIZE: 55,
+  ROWS: 14,
+  CELL_SIZE: 50,
 };
 
 const DraggableGrid = () => {
   const [items, setItems] = useState([
     { id: "item1", row: 1, col: 8, width: 1, height: 1 },
     { id: "item2", row: 3, col: 4, width: 2, height: 1 },
-    { id: "item3", row: 8, col: 1, width: 4, height: 2, isLocked: true },
+    { id: "item3", row: 6, col: 1, width: 10, height: 4, isLocked: true },
   ]);
 
-  const handleResizeStop = (id, event, direction, ref, delta, position) => {
+  const handleResizeStop = (id, _event, _direction, ref, _delta, position) => {
     const col = Math.max(1, Math.round(position.x / CONFIG_GRID.CELL_SIZE) + 1);
     const row = Math.max(1, Math.round(position.y / CONFIG_GRID.CELL_SIZE) + 1);
     const width = Math.max(
@@ -49,7 +49,7 @@ const DraggableGrid = () => {
     setItems(updatedItems);
   };
 
-  const handleDragStop = (id, event, delta) => {
+  const handleDragStop = (id, _event, delta) => {
     const col = Math.max(1, Math.round(delta.x / CONFIG_GRID.CELL_SIZE) + 1);
     const row = Math.max(1, Math.round(delta.y / CONFIG_GRID.CELL_SIZE) + 1);
 
@@ -75,16 +75,66 @@ const DraggableGrid = () => {
     setItems(updatedItems);
   };
 
-  const addItem = () => {
-    setItems((prev) => [
-      ...prev,
-      { id: "item4", row: 1, col: 1, width: 1, height: 1 },
-    ]);
+  const findFirstAvailablePosition = (
+    items,
+    customWidth = 1,
+    customHeight = 1
+  ) => {
+    for (let row = 1; row <= CONFIG_GRID.ROWS - 1; row++) {
+      for (let col = 1; col <= CONFIG_GRID.COLUMNS - 1; col++) {
+        const isOccupied = items.find(
+          (item) =>
+            col < item.col + item.width &&
+            col + customWidth > item.col &&
+            row < item.row + item.height &&
+            row + customHeight > item.row
+        );
+
+        if (!isOccupied) {
+          return { row, col };
+        }
+      }
+    }
+    return null;
+  };
+
+  const handleAddItemClick = ({
+    width = 1,
+    height = 1,
+  }:
+    | {
+        width: number;
+        height: number;
+      }
+    | undefined) => {
+    const firstAvailablePosition = findFirstAvailablePosition(
+      items,
+      width,
+      height
+    );
+  
+    if (!firstAvailablePosition) {
+      console.error('NO more available spaces !')
+      return
+    }
+      setItems((prev) => [
+        ...prev,
+        {
+          id: `item${prev.length + 1}`,
+          row: firstAvailablePosition.row,
+          col: firstAvailablePosition.col,
+          width,
+          height,
+        },
+      ]);
+    
   };
 
   return (
     <>
-      <button onClick={addItem}>add item</button>
+      <button onClick={() => handleAddItemClick({ width: 2, height: 2 })}>
+        Add Item
+      </button>
       <div className="grid">
         {items.map((item) => (
           <Rnd
@@ -110,20 +160,6 @@ const DraggableGrid = () => {
                 <span>{item.id}</span>
                 {item.isLocked && <span> LOCKED !!</span>}
               </p>
-              {item.isLocked && (
-                <p>
-                  Fromage frais cheese triangles rubber cheese. When the cheese
-                  comes out everybody's happy airedale feta airedale cheese
-                  triangles cheese on toast bavarian bergkase melted cheese.
-                  Roquefort cheese and wine cheese on toast stilton ricotta
-                  fondue cheese strings cheese strings. Hard cheese emmental
-                  chalk and cheese cheesy grin monterey jack gouda cheese
-                  triangles cut the cheese. Dolcelatte danish fontina cheesy
-                  feet stinking bishop cheese and wine cheese and biscuits gouda
-                  cut the cheese. Cheese and wine bavarian bergkase say cheese
-                  gouda cheddar parmesan.
-                </p>
-              )}
             </div>
           </Rnd>
         ))}
