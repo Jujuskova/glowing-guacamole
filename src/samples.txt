@@ -1,0 +1,176 @@
+// import { useState } from "react";
+// import "./App.css"; // Import your CSS file
+
+// const DraggableGrid = () => {
+//   const [items, setItems] = useState([
+//     { id: "item1", row: 1, col: 8, type: 'text' },
+//     { id: "item2", row: 3, col: 4, type: 'list' },
+//   ]);
+
+//   const handleDragStart = (e, id) => {
+//     e.dataTransfer.setData("text/plain", id);
+//   };
+
+//    const handleDrop = (e) => {
+//      e.preventDefault();
+//      const itemId = e.dataTransfer.getData("text/plain");
+//      const { offsetX, offsetY } = e.nativeEvent;
+
+//      // Calculate the column and row based on the grid layout
+//      const col = Math.floor((offsetX / e.target.clientWidth) * 10) + 1;
+//      const row = Math.floor((offsetY / e.target.clientHeight) * 15) + 1;
+// console.log(col, row);
+//      const updatedItems = items.map((item) =>
+//        item.id === itemId ? { ...item, row, col } : item
+//      );
+//      setItems(updatedItems);
+//    };
+
+//   const handleDragOver = (e) => {
+//     e.preventDefault();
+//   };
+
+//   return (
+//     <div
+//       className="grid"
+//       onDragOver={handleDragOver}
+//       onDrop={(e) => handleDrop(e)}
+//     >
+//       {items.map((item) => (
+//         <div
+//           key={item.id}
+//           className="item"
+//           draggable
+//           onDragStart={(e) => handleDragStart(e, item.id)}
+//           style={{
+//             gridRow: item.row,
+//             gridColumn: item.col,
+//           }}
+//         >
+//           {item.id}
+//         </div>
+//       ))}
+//     </div>
+//   );
+// };
+
+// const App = () => {
+//   return (
+//     <div className="App">
+//       <DraggableGrid />
+//     </div>
+//   );
+// };
+
+// export default App;
+
+// const constrainPosition = (row, col, width, height) => {
+//   const maxRow = CONFIG_GRID.ROWS - width + 1; // 8 rows - item height + 1
+//   const maxCol = CONFIG_GRID.COLUMNS - height + 1; // 12 columns - item width + 1
+
+//   // Ensure the item stays within the grid boundaries
+//   const constrainedRow = Math.max(1, Math.min(row, maxRow));
+//   const constrainedCol = Math.max(1, Math.min(col, maxCol));
+
+//   return { constrainedRow, constrainedCol };
+// };
+
+// const handleDrop = (e) => {
+//   e.preventDefault();
+//   const itemId = e.dataTransfer.getData("text/plain");
+//   const { offsetX, offsetY } = e.nativeEvent;
+
+//   // Calculate the column and row based on the mouse position
+//   const col =
+//     Math.floor((offsetX / e.target.clientWidth) * CONFIG_GRID.COLUMNS) + 1;
+//   const row =
+//     Math.floor((offsetY / e.target.clientHeight) * CONFIG_GRID.ROWS) + 1;
+
+//   // Find the item being dragged
+//   const draggedItem = items.find((item) => item.id === itemId);
+
+//   if (draggedItem) {
+//     // Calculate the new position
+//     const newRow = row;
+//     const newCol = col;
+
+//     // Check if the new position is within the grid boundaries
+//     const withinBoundaries =
+//       newRow >= 1 &&
+//       newCol >= 1 &&
+//       newRow + draggedItem.height - 1 <= CONFIG_GRID.ROWS &&
+//       newCol + draggedItem.width - 1 <= CONFIG_GRID.COLUMNS;
+
+//     // Check for collisions with other items
+//     // const noCollisions = items.every(
+//     //   (item) =>
+//     //     item.id === itemId ||
+//     //     newRow > item.row + item.height - 1 ||
+//     //     newRow + draggedItem.height - 1 < item.row ||
+//     //     newCol > item.col + item.width - 1 ||
+//     //     newCol + draggedItem.width - 1 < item.col
+//     // );
+
+//     if (withinBoundaries) {
+//       // if (withinBoundaries && noCollisions) {
+//       // Update the item's position in the state
+//       setItems((prevItems) =>
+//         prevItems.map((item) =>
+//           item.id === itemId ? { ...item, row: newRow, col: newCol } : item
+//         )
+//       );
+//     }
+//   }
+// };
+
+// const handleDrop = (e) => {
+//   e.preventDefault();
+//   const itemId = e.dataTransfer.getData("text/plain");
+
+//   // Get the top-left corner position of the grid container
+//   const gridRect = e.target.getBoundingClientRect();
+
+//   // Calculate the relative position within the grid container
+//   const relativeX = e.clientX - gridRect.left;
+//   const relativeY = e.clientY - gridRect.top;
+
+//   // Calculate the column and row based on the relative position and grid dimensions
+//   const col =
+//     Math.floor((relativeX / e.target.clientWidth) * CONFIG_GRID.COLUMNS) + 1;
+//   const row =
+//     Math.floor((relativeY / e.target.clientHeight) * CONFIG_GRID.ROWS) + 1;
+
+//   // Find the item being dragged
+//   const draggedItem = items.find((item) => item.id === itemId);
+
+//   if (draggedItem) {
+//     // Calculate the new position, considering the item's dimensions
+//     const newRow = Math.min(
+//       CONFIG_GRID.ROWS - draggedItem.height + 1,
+//       Math.max(1, row)
+//     );
+//     const newCol = Math.min(
+//       CONFIG_GRID.COLUMNS - draggedItem.width + 1,
+//       Math.max(1, col)
+//     );
+
+//     // Check for collisions with other items after calculating the new position
+//     const noCollisions = items.every(
+//       (item) =>
+//         item.id === itemId ||
+//         newCol >= item.col + item.width ||
+//         newCol + draggedItem.width <= item.col ||
+//         newRow >= item.row + item.height ||
+//         newRow + draggedItem.height <= item.row
+//     );
+
+//     // Update the item's position in the state if there are no collisions
+//     if (noCollisions) {
+//       setItems((prevItems) =>
+//         prevItems.map((item) =>
+//           item.id === itemId ? { ...item, row: newRow, col: newCol } : item
+//         )
+//       );
+//     }
+//   }
+// };

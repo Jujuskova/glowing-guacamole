@@ -1,0 +1,38 @@
+p {
+  margin: 0;
+}
+
+.App {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(10, 55px);
+  grid-template-rows: repeat(15, 55px);
+  border: 2px solid #3498db;
+}
+
+.item {
+  background-color: teal;
+  color: white;
+  padding: 8px;
+  box-sizing: border-box;
+  border-radius: 4px;
+  position: relative;
+  overflow: auto;
+  height: 100%;
+}
+
+/* .resize-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #4285f4;
+  bottom: 0;
+  right: 0;
+  cursor: nwse-resize;
+} */
