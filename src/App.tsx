@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Rnd } from "react-rnd";
-import "./App.css";
+import "./index.css";
 
 const CONFIG_GRID = {
   COLUMNS: 10,
@@ -112,22 +112,21 @@ const DraggableGrid = () => {
       width,
       height
     );
-  
+
     if (!firstAvailablePosition) {
-      console.error('NO more available spaces !')
-      return
+      console.error("NO more available spaces !");
+      return;
     }
-      setItems((prev) => [
-        ...prev,
-        {
-          id: `item${prev.length + 1}`,
-          row: firstAvailablePosition.row,
-          col: firstAvailablePosition.col,
-          width,
-          height,
-        },
-      ]);
-    
+    setItems((prev) => [
+      ...prev,
+      {
+        id: `item${prev.length + 1}`,
+        row: firstAvailablePosition.row,
+        col: firstAvailablePosition.col,
+        width,
+        height,
+      },
+    ]);
   };
 
   return (
@@ -135,7 +134,14 @@ const DraggableGrid = () => {
       <button onClick={() => handleAddItemClick({ width: 2, height: 2 })}>
         Add Item
       </button>
-      <div className="grid">
+      <div
+        className="grid"
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${CONFIG_GRID.COLUMNS}, ${CONFIG_GRID.CELL_SIZE}px)`,
+          gridTemplateRows: `repeat(${CONFIG_GRID.ROWS}, ${CONFIG_GRID.CELL_SIZE}px)`,
+        }}
+      >
         {items.map((item) => (
           <Rnd
             key={item.id}

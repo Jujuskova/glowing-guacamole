@@ -16,8 +16,8 @@ body, p {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(10, 50px);
-  grid-template-rows: repeat(14, 50px);
+  grid-template-columns: repeat(10, 55px);
+  grid-template-rows: repeat(14, 55px);
   background-color: white;
 }
 
