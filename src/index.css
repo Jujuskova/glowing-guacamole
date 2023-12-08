@@ -28,3 +28,14 @@ body, p {
   overflow: auto;
   height: 100%;
 }
+
+.item.selected {
+  background-color: slateblue;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+

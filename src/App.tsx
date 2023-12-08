@@ -1,5 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Rnd } from "react-rnd";
+
+import type { Item } from "./types";
+
 import "./index.css";
 
 const CONFIG_GRID = {
@@ -9,11 +12,37 @@ const CONFIG_GRID = {
 };
 
 const DraggableGrid = () => {
-  const [items, setItems] = useState([
+  const [items, setItems] = useState<Item[]>([
     { id: "item1", row: 1, col: 8, width: 1, height: 1 },
     { id: "item2", row: 3, col: 4, width: 2, height: 1 },
     { id: "item3", row: 6, col: 1, width: 10, height: 4, isLocked: true },
   ]);
+  const [currentItemSelected, setCurrentItemSelected] = useState<Item | null>(
+    null
+  );
+
+  const handleDocumentMouseDown = (e) => {
+    const selectedItemElement = document.querySelector(".item.selected");
+
+    if (
+      selectedItemElement &&
+      !selectedItemElement.contains(e.target) &&
+      !e.target.classList.contains("item")
+    ) {
+      // Clicked outside the selected item, unselect it
+      setCurrentItemSelected(null);
+    }
+  };
+
+  useEffect(() => {
+    // Attach the mousedown event listener to the document
+    document.addEventListener("mousedown", handleDocumentMouseDown);
+
+    // Clean up the event listener when the component unmounts
+    return () => {
+      document.removeEventListener("mousedown", handleDocumentMouseDown);
+    };
+  }, []); // Removed currentItemSelected from the dependency array
 
   const handleResizeStop = (id, _event, _direction, ref, _delta, position) => {
     const col = Math.max(1, Math.round(position.x / CONFIG_GRID.CELL_SIZE) + 1);
@@ -129,11 +158,28 @@ const DraggableGrid = () => {
     ]);
   };
 
+  const onRemoveItem = (itemId: Item["id"]) => {
+    setItems((prev) => prev.filter((i) => i.id !== itemId));
+    setCurrentItemSelected(null);
+  };
+
+  const onSelectItem = (selectedItem: Item) => {
+    if (selectedItem.isLocked) return;
+    setCurrentItemSelected(selectedItem);
+  };
+
   return (
     <>
-      <button onClick={() => handleAddItemClick({ width: 2, height: 2 })}>
-        Add Item
-      </button>
+      <div className="actions">
+        <button onClick={() => handleAddItemClick({ width: 2, height: 2 })}>
+          Add new item
+        </button>
+        {currentItemSelected && (
+          <button onClick={() => onRemoveItem(currentItemSelected.id)}>
+            {`remove ${currentItemSelected.id}`}
+          </button>
+        )}
+      </div>
       <div
         className="grid"
         style={{
@@ -160,8 +206,14 @@ const DraggableGrid = () => {
             disableDragging={item.isLocked}
             enableResizing={!item.isLocked}
             bounds=".grid"
+            onClick={() => onSelectItem(item)}
           >
-            <div className={`item ${item.isLocked ? "locked" : ""}`}>
+            <div
+              className={`item ${
+                currentItemSelected?.id === item.id ? "selected" : ""
+              }`}
+             
+            >
               <p>
                 <span>{item.id}</span>
                 {item.isLocked && <span> LOCKED !!</span>}
