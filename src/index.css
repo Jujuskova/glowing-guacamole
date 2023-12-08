@@ -1,8 +1,26 @@
-body, p {
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  height: 100%;
+}
+
+p {
   margin: 0;
 }
 
-.App {
+/* .App {
   display: flex;
   justify-content: space-evenly;
   align-items: center;
@@ -12,7 +30,7 @@ body, p {
   box-sizing: border-box;
   gap: 32px;
   background-color: rgb(228, 228, 228);
-}
+} */
 
 .grid {
   background-color: white;

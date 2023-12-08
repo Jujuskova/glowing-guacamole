@@ -1,14 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Rnd } from "react-rnd";
+import { Theme } from "@mui/material";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 import type { Item } from "../types";
-
-
-const CONFIG_GRID = {
-  COLUMNS: 10,
-  ROWS: 14,
-  CELL_SIZE: 50,
-};
+import { CONFIG_GRID } from "../constants";
+import { getCellSize } from "../helpers";
+import { useResizeWindow } from "../hooks/useResizeWindow";
 
 function DraggableGrid() {
   const [items, setItems] = useState<Item[]>([
@@ -16,20 +14,30 @@ function DraggableGrid() {
     { id: "item2", row: 3, col: 4, width: 2, height: 1 },
     { id: "item3", row: 6, col: 1, width: 10, height: 4, isLocked: true },
   ]);
-  const [currentItemSelected, setCurrentItemSelected] = useState<Item | null>(
-    null
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+
+  const { windowHeight, windowWidth } = useResizeWindow();
+
+  const isSmallScreens = useMediaQuery((theme: Theme) =>
+    theme.breakpoints.between("xs", "md")
+  );
+  const isDesktop = useMediaQuery((theme: Theme) => theme.breakpoints.up("xl"));
+
+  const cellSize = useMemo(
+    () => getCellSize(isSmallScreens, isDesktop),
+    [isSmallScreens, isDesktop]
   );
 
   const handleDocumentMouseDown = (e) => {
     const selectedItemElement = document.querySelector(".item.selected");
-
+// todo: and focused item not a button
     if (
       selectedItemElement &&
       !selectedItemElement.contains(e.target) &&
       !e.target.classList.contains("item")
     ) {
       // Clicked outside the selected item, unselect it
-      setCurrentItemSelected(null);
+      setSelectedItem(null);
     }
   };
 
@@ -41,19 +49,13 @@ function DraggableGrid() {
     return () => {
       document.removeEventListener("mousedown", handleDocumentMouseDown);
     };
-  }, []); // Removed currentItemSelected from the dependency array
+  }, []);
 
   const handleResizeStop = (id, _event, _direction, ref, _delta, position) => {
-    const col = Math.max(1, Math.round(position.x / CONFIG_GRID.CELL_SIZE) + 1);
-    const row = Math.max(1, Math.round(position.y / CONFIG_GRID.CELL_SIZE) + 1);
-    const width = Math.max(
-      1,
-      Math.round(ref.offsetWidth / CONFIG_GRID.CELL_SIZE)
-    );
-    const height = Math.max(
-      1,
-      Math.round(ref.offsetHeight / CONFIG_GRID.CELL_SIZE)
-    );
+    const col = Math.max(1, Math.round(position.x / cellSize) + 1);
+    const row = Math.max(1, Math.round(position.y / cellSize) + 1);
+    const width = Math.max(1, Math.round(ref.offsetWidth / cellSize));
+    const height = Math.max(1, Math.round(ref.offsetHeight / cellSize));
 
     const updatedItems = items.map((item) => {
       if (item.id === id) {
@@ -78,8 +80,8 @@ function DraggableGrid() {
   };
 
   const handleDragStop = (id, _event, delta) => {
-    const col = Math.max(1, Math.round(delta.x / CONFIG_GRID.CELL_SIZE) + 1);
-    const row = Math.max(1, Math.round(delta.y / CONFIG_GRID.CELL_SIZE) + 1);
+    const col = Math.max(1, Math.round(delta.x / cellSize) + 1);
+    const row = Math.max(1, Math.round(delta.y / cellSize) + 1);
 
     const updatedItems = items.map((item) => {
       if (item.id === id) {
@@ -159,12 +161,12 @@ function DraggableGrid() {
 
   const onRemoveItem = (itemId: Item["id"]) => {
     setItems((prev) => prev.filter((i) => i.id !== itemId));
-    setCurrentItemSelected(null);
+    setSelectedItem(null);
   };
 
   const onSelectItem = (selectedItem: Item) => {
     if (selectedItem.isLocked) return;
-    setCurrentItemSelected(selectedItem);
+    setSelectedItem(selectedItem);
   };
 
   return (
@@ -173,9 +175,9 @@ function DraggableGrid() {
         <button onClick={() => handleAddItemClick({ width: 2, height: 2 })}>
           Add new item
         </button>
-        {currentItemSelected && (
-          <button onClick={() => onRemoveItem(currentItemSelected.id)}>
-            {`remove ${currentItemSelected.id}`}
+        {selectedItem && (
+          <button onClick={() => onRemoveItem(selectedItem.id)}>
+            {`remove ${selectedItem.id}`}
           </button>
         )}
       </div>
@@ -183,20 +185,21 @@ function DraggableGrid() {
         className="grid"
         style={{
           display: "grid",
-          gridTemplateColumns: `repeat(${CONFIG_GRID.COLUMNS}, ${CONFIG_GRID.CELL_SIZE}px)`,
-          gridTemplateRows: `repeat(${CONFIG_GRID.ROWS}, ${CONFIG_GRID.CELL_SIZE}px)`,
+          gridTemplateColumns: `repeat(${CONFIG_GRID.COLUMNS}, ${cellSize}px)`,
+          gridTemplateRows: `repeat(${CONFIG_GRID.ROWS}, ${cellSize}px)`,
         }}
       >
         {items.map((item) => (
+          // hack to re-render the item on resize of the window because its position is absolute
           <Rnd
-            key={item.id}
+            key={`${item.id}-${windowWidth}-${windowHeight}-${cellSize}`}
             size={{
-              width: item.width * CONFIG_GRID.CELL_SIZE,
-              height: item.height * CONFIG_GRID.CELL_SIZE,
+              width: item.width * cellSize,
+              height: item.height * cellSize,
             }}
             position={{
-              x: (item.col - 1) * CONFIG_GRID.CELL_SIZE,
-              y: (item.row - 1) * CONFIG_GRID.CELL_SIZE,
+              x: (item.col - 1) * cellSize,
+              y: (item.row - 1) * cellSize,
             }}
             onResizeStop={(e, direction, ref, delta, position) =>
               handleResizeStop(item.id, e, direction, ref, delta, position)
@@ -209,7 +212,7 @@ function DraggableGrid() {
           >
             <div
               className={`item ${
-                currentItemSelected?.id === item.id ? "selected" : ""
+                selectedItem?.id === item.id ? "selected" : ""
               }`}
             >
               <p>
