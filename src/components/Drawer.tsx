@@ -1,8 +1,18 @@
-import { Button, Drawer as MuiDrawer } from "@mui/material";
+import { Button, Drawer as MuiDrawer, Stack } from "@mui/material";
+import { Item } from "../types";
 
-function Drawer() {
+function Drawer({
+  handleAddItemClick,
+  onRemoveItem,
+  selectedItem,
+}: {
+  handleAddItemClick(length?: { width: number; height: number }): void;
+  onRemoveItem(itemId: Item["id"]): void;
+  selectedItem: Item | null;
+}) {
   return (
     <MuiDrawer
+      id="drawer-custom-template"
       variant="permanent"
       anchor="left"
       open
@@ -16,7 +26,22 @@ function Drawer() {
         },
       }}
     >
-      <Button variant="contained">Add item</Button>
+      <Stack gap={2}>
+        <Button
+          variant="contained"
+          onClick={() => handleAddItemClick({ width: 3, height: 2 })}
+        >
+          Add item
+        </Button>
+        {selectedItem && (
+          <Button
+            variant="contained"
+            onClick={() => onRemoveItem(selectedItem.id)}
+          >
+            Remove item
+          </Button>
+        )}
+      </Stack>
     </MuiDrawer>
   );
 }
